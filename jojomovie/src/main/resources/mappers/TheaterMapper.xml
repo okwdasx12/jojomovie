@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.TheaterMapper">
+	<insert id="insert">
+		INSERT INTO theater(theater_id, theater_name,
+		address, number)
+		VALUES (#{theaterId}, #{theaterName}, #{address},
+		#{number})
+	</insert>
+
+	<update id="update">
+		update theater set theater_name=#{theaterName},
+		address=#{address}, number=#{number} where theater_id=#{theaterId}
+	</update>
+	
+	<update id='updateDif'>
+      update sangyounggwan as a, time as b set a.theater_name=#{afterTheaterName}, b.theater_name=#{afterTheaterName} where a.theater_name=#{beforeTheaterName} and b.theater_name=#{beforeTheaterName}
+   </update>
+
+	<update id="searchSygId">
+		update sangyounggwan set syg_id = replace(syg_id, #{strBefore},#{strAfter})
+		where syg_id like concat('%',#{strBefore},'%')
+	</update>
+
+	<update id="searchSygTimeInSygId">
+		update time set syg_id = replace(syg_id, #{strBefore},#{strAfter})
+		where syg_id like concat('%',#{strBefore},'%')
+	</update>
+
+	<select id="getTotalCountTh" resultType="int">
+		select count(*)
+		from theater
+		<if test="category =='theater_name'">
+			WHERE theater_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<select id="getTheaters" resultType="TheaterVo">
+		SELECT *
+		FROM theater
+		<if test="category =='theater_name'">
+			WHERE theater_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+
+		ORDER BY theater_name ASC
+		LIMIT #{startRowTh}, #{pageSize}
+	</select>
+</mapper>

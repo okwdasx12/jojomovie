@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.example.mapper.SangyoungTimeMapper">
+	<insert id="insert">
+		insert into time(time_num, sangyoung_time, theater_name, syg_id, movie_name, movie_id)
+		values (#{timeNum}, #{sangyoungTime}, #{theaterName}, #{sygId}, #{movieName}, #{movieId})
+	</insert>
+	
+	<update id="update">
+		update time set sangyoung_time=#{sangyoungTime}, theater_name=#{theaterName}, syg_id=#{sygId}, movie_name=#{movieName}, movie_id=#{movieId} where time_num=#{timeNum} 
+	</update>
+
+	<select id="getTotalCountSyt" resultType="int">
+		select count(*)
+		from time
+		<if test="category =='theater_name'">
+			WHERE theater_name LIKE CONCAT('%', #{search}, '%') 
+		</if>
+		<if test="category =='syg_id'">
+			WHERE syg_id LIKE CONCAT('%', #{search}, '%') 
+		</if>
+		<if test="category =='movie_name'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%') 
+		</if>
+	</select>
+	
+	<select id="getSangyounggwanTimes" resultType="timeVo">
+		SELECT * 
+		FROM time 
+		<if test="category =='theater_name'">
+			WHERE theater_name LIKE CONCAT('%', #{search}, '%') 
+		</if>
+		<if test="category =='syg_id'">
+			WHERE syg_id LIKE CONCAT('%', #{search}, '%') 
+		</if>
+		<if test="category =='movie_name'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%') 
+		</if>
+		ORDER BY syg_id ASC 
+		LIMIT #{startRowSyt}, #{pageSize}
+	</select>
+</mapper>

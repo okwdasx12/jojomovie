@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.NoticeBoardMapper">
+
+	<!--===================*** 관리자 공지사항***=========================== -->
+
+	<insert id="insertAdminNotice">
+		INSERT INTO notice(num, admin_id, subject, content, readcount, reg_date, category)
+		VALUES ( #{num} , #{adminId}, #{subject}, #{content}, #{readcount}, #{regDate}, #{category})
+	</insert>
+	
+	<!--공지사항 검색 포함. -->
+	<select id="noticeBoardGetAll" resultType="noticeVo">
+		SELECT *
+		FROM notice
+		<if test="category == 'categoryEvent'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+		<if test="category == 'categoryNotice'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+		ORDER BY num DESC
+		LIMIT #{startRow} , #{pageSize}
+	</select>
+
+	<!-- 총갯수 -->
+	<select id="countAllNotice" resultType="int">
+		SELECT COUNT(*)
+		FROM notice
+		<if test="category == 'categoryEvent'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+		<if test="category == 'categoryNotice'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+	</select>
+
+	<!-- 게시물 하나 -->
+	<select id="noticeListGetOne" resultType="noticeVo">
+		SELECT *
+		FROM notice
+		WHERE num = #{num}
+	</select>
+
+	<!--게시물 조회수 -->
+	<update id="updateReadcount">
+		UPDATE notice
+		SET readcount = readcount + 1
+		WHERE num = #{num}
+	</update>
+
+	<!--수정 -->
+	<update id="noticeModify">
+		UPDATE notice
+		SET subject =#{subject} , content=#{content}
+		WHERE num = #{num}
+	</update>
+
+	<select id="getBoardAndAttachfilesByNum" resultMap="boardAndAttachfiles">
+		SELECT n.num, n.admin_id, n.subject, n.content, n.readcount,
+		n.reg_date, n.category ,p.*
+		FROM notice n LEFT OUTER JOIN attachposter p
+		ON n.num = p.bno
+		WHERE n.num = #{num}
+	</select>
+
+	<resultMap id="boardAndAttachfiles" type="noticeVo">
+		<id column="num" property="num" />
+		<result column="adminId" property="admin_id" />
+		<result column="subject" property="subject" />
+		<result column="content" property="content" />
+		<result column="readcount" property="readcount" />
+		<result column="reg_date" property="regDate" />
+		<result column="category" property="category" />
+		<collection property="attachList" ofType="attachPosterVo">
+			<id column="uuid" property="uuid" />
+			<result column="filename" property="filename" />
+			<result column="uploadpath" property="uploadpath" />
+			<result column="image" property="image" />
+			<result column="bno" property="bno" />
+		</collection>
+	</resultMap>
+
+	<!-- 삭제하기 -->
+	<delete id="noticeDelete">
+		DELETE FROM notice
+		WHERE num = #{num}
+	</delete>
+
+	<!-- uuid삭제 -->
+	<delete id="noticeDeleteUuid">
+		DELETE FROM attachposter
+		WHERE bno = #{num}
+	</delete>
+
+	<update id="updateNotice">
+		UPDATE notice
+		SET subject=#{subject}, content=#{content}
+		WHERE num = #{num}
+	</update>
+
+</mapper>

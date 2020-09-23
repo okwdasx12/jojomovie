@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.example.mapper.ReservationMapper">
+  
+     <insert id="insertReservation">
+        INSERT INTO reservation(user_id, movie_id, movie_name, theater_name, syg_id, seat, reserve_date, sangyoung_time, tf, pay_id, ticket_id)
+        VALUES (#{userId}, #{movieId}, #{movieName}, #{theaterName}, #{sygId}, #{seat}, #{reserveDate}, #{sangyoungTime}, 't', #{payId}, #{ticketId})
+    </insert>
+    
+    <insert id="insertPay">
+        INSERT INTO pay(pay_id, user_id, pay_date, howmany, point, usepoint, total_price, movie_id, ticket_id, movie_name)
+        VALUES (#{payId}, #{userId}, #{payDate}, #{howmany}, #{point}, #{usepoint}, #{totalPrice}, #{movieId}, #{ticketId}, #{movieName})
+    </insert>
+    
+    <update id="updateReserveSeats">
+    	update time set reserve_seats=#{strSeats} where time_num=#{timeNum}
+    </update>
+    
+    <update id="updateUserPoint">
+    	update member set point=#{usepoint} where user_id=#{userId}
+    </update>
+    
+  </mapper>
+  

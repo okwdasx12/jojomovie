@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.example.mapper.MovieMapper">
+	<update id="updateLikeCount">
+		UPDATE movie
+		SET like_cnt = like_cnt + 1
+		WHERE
+		movie_id = #{movieId}
+	</update>
+
+	<update id="deleteLikeCount">
+		UPDATE movie
+		SET like_cnt = like_cnt - 1
+		WHERE
+		movie_id = #{movieId}
+	</update>
+
+	<insert id="insert"> <!-- id속성은 메소드 이름 -->
+		INSERT INTO movie (movie_id, director, cast, grade, information,
+		score, like_cnt, start_date, end_date, genre, runtime)
+		VALUES
+		(#{movieId}, #{director}, #{cast}, #{grade}, #{information},
+		#{score},
+		#{likeCnt}, #{startDate}, #{endDate}, #{genre}, #{runtime})
+	</insert>
+
+	<select id="getMovieBoards" resultType="movieVo">
+		SELECT *
+		FROM movie_release
+		<if test="category != null and category == 'all'">
+			WHERE cast LIKE CONCAT('%', #{search}, '%')
+			or movie_name LIKE CONCAT('%', #{search}, '%')
+			or grade LIKE CONCAT('%', #{search}, '%')
+			or director LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'movieName'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'genre'">
+			WHERE genre LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'cast'">
+			WHERE cast LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'score'">
+			ORDER BY score DESC
+		</if>
+		<if test="category == 'like'">
+			ORDER BY like_cnt DESC
+		</if>
+		<if test="category == 'avgStar'">
+			ORDER BY avg_star DESC
+		</if>
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+
+	<select id="getMovieTotalcount" resultType="int">
+		select count(*)
+		from movie
+		<if test="category != null and category == 'all'">
+			WHERE cast LIKE CONCAT('%', #{search}, '%')
+			or movie_name LIKE CONCAT('%', #{search}, '%')
+			or grade LIKE CONCAT('%', #{search}, '%')
+			or director LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'movieId'">
+			WHERE movie_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'movieName'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'genre'">
+			WHERE genre LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'cast'">
+			WHERE cast LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<select id="getBoardByNum" resultType="movieVo">
+		SELECT * FROM movie WHERE
+		movie_id = #{movieId}
+	</select>
+
+	<select id="getTotalcountMovie" resultType="int">
+		select count(*)
+		from
+		movie
+		WHERE movie_id = #{movieId}
+	</select>
+
+	<select id="getMoviePresent">
+		SELECT *
+		FROM movie_release
+		WHERE rel_movie ='상영중'
+		<if test="category == 'score'">
+			order by m.score desc;
+		</if>
+		<if test="category == 'like'">
+			ORDER BY like_cnt DESC
+		</if>
+		<if test="category == 'star'">
+			order by c.cmt_star desc;
+		</if>
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+
+	<!-- 테스트용 -->
+	<select id="getCurrentTotalMovieCount" resultType="int">
+		SELECT
+		count(*)
+		FROM movie_release
+		WHERE rel_movie ='상영중'
+		<if test="category == 'movieName'">
+			AND movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<select id="getCurrentMovies" resultType="movieVo">
+		SELECT *
+		FROM movie_release
+		WHERE rel_movie ='상영중'
+		<if test="category == 'date'">
+			ORDER BY start_date ASC
+		</if>
+		<if test="category == 'like'">
+			ORDER BY like_cnt DESC
+		</if>
+		<if test="category == 'score'">
+			ORDER BY score DESC
+		</if>
+		<if test="category != null and category == 'movieName'">
+			AND movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'genre'">
+			AND genre LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'cast'">
+			AND cast LIKE CONCAT('%', #{search}, '%')
+		</if>
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+
+	<select id="getCurrentMovie" resultType="movieVo">
+		SELECT *
+		FROM
+		movie_release
+		WHERE rel_movie ='상영중'
+		ORDER BY avg_Star DESC
+	</select>
+
+	<select id="getComingTotalMovieCount" resultType="int">
+		SELECT count(*)
+		FROM movie_release
+		WHERE rel_movie ='상영예정'
+		<if test="category == 'movieName'">
+			AND movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<select id="getComingMovies" resultType="movieVo">
+		SELECT *
+		FROM
+		movie_release
+		WHERE rel_movie = '상영예정'
+		<if test="category != null and category == 'movieName'">
+			AND movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'genre'">
+			AND genre LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'cast'">
+			AND cast LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'date'">
+			ORDER BY start_date ASC
+		</if>
+		<if test="category == 'like'">
+			ORDER BY like_cnt DESC
+		</if>
+		<if test="category == 'score'">
+			ORDER BY score DESC
+		</if>
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+</mapper>

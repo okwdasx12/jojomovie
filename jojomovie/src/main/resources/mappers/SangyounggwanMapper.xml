@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.example.mapper.SangyounggwanMapper">
+	<insert id="insert">
+		insert into sangyounggwan (syg_id, theater_id, theater_name, seats_num, row, cul)
+		values (#{sygId}, #{theaterId}, #{theaterName}, #{seatsNum}, #{row}, #{cul})
+	</insert>
+	
+	<update id ="update">
+		update sangyounggwan set syg_id=#{newSygId}, theater_id=#{theaterId}, theater_name=#{theaterName}, seats_num=#{seatsNum}, row=#{row}, cul=#{cul} where syg_id=#{sygId}
+	</update>
+	
+	<update id='updateDif'>
+      update time set syg_id= replace(syg_id, #{beforeStr}, #{afterStr})
+      where syg_id like concat ('%', #{beforeStr}, '%')
+   </update>
+
+	<select id="getTotalCountSyg" resultType="int">
+		select count(*)
+		from sangyounggwan
+		<if test="category =='syg_id'">
+			WHERE syg_id LIKE CONCAT('%', #{search}, '%') 
+		</if>
+	</select>
+	
+	<select id="getSangyounggwans" resultType="sangyounggwanVo">
+		SELECT * 
+		FROM sangyounggwan 
+		<if test="category =='syg_id'">
+			WHERE syg_id LIKE CONCAT('%', #{search}, '%') 
+		</if>
+		ORDER BY syg_id ASC 
+		LIMIT #{startRowSyg}, #{pageSize}
+	</select>
+</mapper>

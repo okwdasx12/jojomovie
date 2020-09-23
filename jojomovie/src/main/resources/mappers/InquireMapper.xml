@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.InquireMapper">
+	<insert id="insertInquire"> <!-- id속성은 메소드 이름 -->
+		INSERT INTO inquire (user_id, subject, content, ip, reg_date, re_ref, re_lev, re_comp) 
+		VALUES (#{userId}, #{subject}, #{content}, #{ip}, #{regDate}, #{reRef}, #{reLev}, #{reComp})
+	</insert>
+	
+	<update id="updateInquire"> <!-- id속성은 메소드 이름 -->
+		UPDATE inquire
+		SET subject=#{subject}, content=#{content}, ip=#{ip}, reg_date=#{regDate}
+		WHERE num=#{num}
+	</update>
+
+	<select id="getInquires" resultType="inquireVo">
+		SELECT * 
+		FROM inquire 
+		WHERE 
+		<if test="grade == '관리자'">
+			user_id != #{userId}
+		</if>
+		<if test="grade == '일반'">
+			user_id = #{userId}
+		</if>
+		<if test="category != null and category == 'content'">
+			AND content LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'subject'">
+			AND subject LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'regDate'">
+			AND reg_date LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category != null and category == 'userId'">
+			AND user_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+		ORDER BY re_ref DESC, re_lev ASC 
+		LIMIT #{startRow}, #{pageSize} 
+	</select>
+	
+	<select id="getTotalCount" resultType="_int"> 
+		SELECT count(*) 
+		FROM inquire
+		WHERE 
+		<if test="grade == '관리자'">
+			user_id != #{userId}
+		</if>
+		<if test="grade == '일반'">
+			user_id = #{userId}
+		</if>
+		<if test="category == 'content'">
+			AND content LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'subject'">
+			AND subject LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'regDate'">
+			AND reg_date LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'userId'">
+			AND user_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<!-- 관리자 / 일반 나눠서 SQL문 호출 -->
+	<select id="getInquireTotalCount" resultType="_int"> 
+		SELECT count(*) 
+		FROM inquire 
+		WHERE
+		<if test="grade == '관리자'">
+			re_Lev = 0
+		</if>
+		<if test="grade == '일반'">
+			user_id = #{userId} and re_Lev = 0
+		</if>
+	</select>
+	
+	<select id="getInquireIngCount" resultType="_int"> 
+		SELECT count(*) 
+		FROM inquire 
+		WHERE
+		<if test="grade == '관리자'">
+			re_Lev = 0 and re_comp = 0
+		</if>
+		<if test="grade == '일반'">
+			user_id = #{userId} and re_Lev = 0 and re_comp = 0
+		</if>
+	</select>
+	
+	<select id="getInquireFinCount" resultType="_int"> 
+		SELECT count(*) 
+		FROM inquire 
+		WHERE
+		<if test="grade == '관리자'">
+			re_Lev = 0 and re_comp = 1
+		</if>
+		<if test="grade == '일반'">
+			user_id = #{userId} and re_Lev = 0 and re_comp = 1
+		</if>
+	</select>
+	
+</mapper>

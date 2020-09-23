@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper 
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.AdminMapper">
+
+	<!-- 입력 -->
+	<insert id="insert">
+		INSERT INTO movie(movie_id,movie_name, director, cast, grade, information, score, like_cnt, start_date, end_date, genre, runtime )
+		VALUES (#{movieId}, #{movieName}, #{director}, #{cast}, #{grade}, #{information}, #{score}, #{likeCnt}, #{startDate}, #{endDate}, #{genre}, #{runtime})
+	</insert>
+
+	<!--검색 리스트 뽑기 -->
+	<select id="getBoards" resultType="MovieVo">
+		SELECT *
+		FROM movie_release
+		<if test="category == 'movieName'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'director'">
+			WHERE director LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'grade'">
+			WHERE grade LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'genre'">
+			WHERE genre LIKE CONCAT('%', #{search}, '%')
+		</if>
+		ORDER BY end_date DESC
+		LIMIT #{startRow} , #{pageSize}
+	</select>
+
+
+
+	<!-- 검색한 게시물 총 갯수 -->
+	<select id="getTotalCount" resultType="int">
+		SELECT COUNT(*)
+		FROM movie
+		<if test="category == 'movieName'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'director'">
+			WHERE director LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'grade'">
+			WHERE grade LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'genre'">
+			WHERE genre LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<!--수정폼 가져오기 -->
+	<select id="ListGetOne" resultType="MovieVo">
+		SELECT *
+		FROM movie
+		WHERE movie_id = #{movieId}
+	</select>
+
+	<!--업데이트 -->
+	<update id="updateMovie">
+		UPDATE movie
+		SET movie_name = #{movieName}, director = #{director}, cast = #{cast},
+			grade = #{grade}, information = #{information}, score = #{score},
+			like_cnt = #{likeCnt}, start_date = #{startDate}, end_date = #{endDate},
+		genre = #{genre}, runtime = #{runtime}
+		WHERE movie_id = #{movieId}
+	</update>
+
+	<delete id="DeleteMovie">
+		DELETE FROM movie
+		WHERE movie_id = #{movieId}
+	</delete>
+
+	<!--=================================================================== -->
+	<!--=================================================================== -->
+	<!--===================*** 회 * 원 * 관 * 리 * 페 * 이 * 지 ***=========================== -->
+	<select id="memberManage" resultType="MemberVo">
+		SELECT *
+		FROM member
+		<if test="category == 'userId'">
+			WHERE user_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'grade'">
+			WHERE grade LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'point'">
+			WHERE point LIKE CONCAT('%', #{search}, '%')
+		</if>
+		ORDER BY point DESC
+		LIMIT #{startRow} , #{pageSize}
+	</select>
+
+	<select id="countAllMember" resultType="int">
+		SELECT COUNT(*)
+		FROM member
+		<if test="category == 'userId'">
+			WHERE user_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'grade'">
+			WHERE grade LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'point'">
+			WHERE point LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+	<select id="getOne" resultType="memberVo">
+		SELECT *
+		FROM member
+		WHERE user_id = #{userId}
+	</select>
+
+	<!--회원수정 password -> passwd -->
+	<update id="updateMember">
+		update member
+		set user_id = #{userId},
+			passwd = #{passwd},
+			name = #{name},
+			birthday = #{birthday},
+			user_addr = #{userAddr},
+			phone = #{phone},
+			point = #{point},
+			grade = #{grade}
+		WHERE user_id = #{userId}
+	</update>
+
+	<!--=================================================================== -->
+	<!--=================================================================== -->
+	<!--===================*** 예 * 약 * 관 * 리 * 페 * 이 * 지 ***=========================== -->
+
+	<select id="Listreserv" resultType="reserveVo">
+		SELECT *
+		FROM reservation
+		<if test="category == 'userId'">
+			WHERE user_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'theaterName'">
+			WHERE theater_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'movieName'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		ORDER by reserve_date
+		LIMIT #{startRow} , #{pageSize}
+	</select>
+
+	<select id="getCountReserv" resultType="int">
+		SELECT COUNT(*)
+		from reservation
+		<if test="category == 'userId'">
+			WHERE user_id LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'theaterName'">
+			WHERE theater_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+		<if test="category == 'movieName'">
+			WHERE movie_name LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+
+
+
+	<select id="selectReserv" resultMap="joinReserve">
+		SELECT r.*, p.total_price, p.point, p.usepoint
+		FROM reservation r LEFT OUTER JOIN pay p
+		ON p.ticket_id = r.ticket_id
+		WHERE p.ticket_id = #{ticketId}
+	</select>
+
+	<resultMap id="joinReserve" type="reserveVo">
+		<id column="reserve_number" property="reserveNumber" />
+		<result column="user_id" property="userId" />
+		<result column="movie_id" property="movieId" />
+		<result column="movie_name" property="movieName" />
+		<result column="theater_name" property="theaterName" />
+		<result column="syg_id" property="sygId" />
+		<result column="seat" property="seat" />
+		<result column="reserve_date" property="reserveDate" />
+		<result column="sangyoung_time" property="sangyoungTime" />
+		<result column="tf" property="tf" />
+		<result column="pay_id" property="payId" />
+		<result column="ticket_id" property="ticketId" />
+		<collection property="payList" ofType="payVo">
+			<id property="payId" column="pay_id" />
+			<result column="user_id" property="userId" />
+			<result column="pay_date" property="payDate" />
+			<result column="howmany" property="howmany" />
+			<result column="point" property="point" />
+			<result column="usepoint" property="usepoint" />
+			<result column="total_price" property="totalPrice" />
+			<result column="movie_id" property="movieId" />
+			<result column="ticket_id" property="ticketId" />
+			<result column="movie_name" property="movieName" />
+		</collection>
+	</resultMap>
+
+	<!-- 예약 내역 수정 -->
+	<select id="ReserVgetByOne" resultType="reserveVo">
+		SELECT *
+		FROM reservation
+		WHERE reserve_number = #{reserveNumber}
+	</select>
+
+	<delete id="deleteReserve">
+		DELETE
+		FROM reservation
+		WHERE reserve_number =
+		#{reserveNumber}
+	</delete>
+
+	<delete id="deletePay">
+		DELETE
+		FROM pay
+		WHERE pay_id = #{payId}
+	</delete>
+
+
+
+	<!-- 멤버삭제 -->
+	<delete id="deleteMemberByCheck">
+		DELETE
+		FROM member
+		WHERE user_id IN
+		<foreach collection="userlist" close=")" separator=","
+			open="(" item="user">
+			#{user}
+		</foreach>
+	</delete>
+
+	<!-- 차트 -->
+	<select id="chartSelect" resultType="movieVo">
+		SELECT score, like_cnt,
+		movie_id
+		from movie
+		where movie_id = #{searchMovie}
+	</select>
+
+	<!--=================================================================== -->
+	<!--=================================================================== -->
+	<!--===================*** 관리자 공지사항***=========================== -->
+
+	<insert id="insertAdminNotice">
+		INSERT INTO notice(admin_id, subject, content, readcount, reg_date,
+		category)
+		VALUES ( #{adminId}, #{subject}, #{content}, #{readcount}, #{regDate},
+		#{category})
+	</insert>
+
+
+	<!--공지사항 검색 포함. -->
+	<select id="noticeBoardGetAll" resultType="noticeVo">
+		SELECT num, admin_id, subject, content, readcount, category
+		FROM notice
+		<if test="category == 'categoryEvent'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+		<if test="category == 'categoryNotice'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+		ORDER BY num DESC
+		LIMIT #{startRow} , #{pageSize}
+	</select>
+
+
+	<!-- 총갯수 -->
+	<select id="countAllNotice" resultType="int">
+		SELECT COUNT(*)
+		FROM notice
+		<if test="category == 'categoryEvent'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+		<if test="category == 'categoryNotice'">
+			WHERE subject LIKE CONCAT('%', #{search}, '%')
+			and category = #{category}
+		</if>
+	</select>
+
+	<!-- 게시물 하나 -->
+	<select id="noticeListGetOne" resultType="noticeVo">
+		SELECT *
+		FROM notice
+		WHERE num = #{num}
+	</select>
+</mapper> 	

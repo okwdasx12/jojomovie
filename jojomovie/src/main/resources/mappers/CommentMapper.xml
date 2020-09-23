@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- namespace는 MemberMapper 인터페이스 이름으로 설정 -->
+<mapper namespace="com.example.mapper.CommentMapper">
+
+	<insert id="insert"> <!-- id속성은 메소드 이름  -->
+		INSERT INTO cmt (cmt_number, user_id, cmt_star, cmt_content, movie_id, cmt_reg_date, movie_name) 
+		VALUES (#{cmtNumber}, #{userId}, #{cmtStar}, #{cmtContent}, #{movieId}, #{cmtRegDate}, #{movieName}) 
+	</insert>
+	
+	<select id="getBoards" resultType="commentVo">
+		SELECT * 
+		FROM cmt
+		WHERE movie_id = #{movieId}
+		<if test="category != null and category == 'cmtContent'">
+			WHERE content LIKE CONCAT('%', #{search}, '%')
+		</if>
+		LIMIT #{startRow}, #{pageSize}
+	</select>
+	
+	<select id="getTotalCount" resultType="int">
+		SELECT count(*)
+		FROM cmt
+		WHERE movie_id = #{movieId}
+		<if test="category == 'cmtContent'">
+			WHERE content LIKE CONCAT('%', #{search}, '%')
+		</if>
+	</select>
+	
+	
+	<select id="getBoardByNum" resultType="commentVo">
+		SELECT * FROM cmt WHERE cmt_number = #{cmtNumber}
+	</select>
+	
+	<select id="totalStarByMovie" resultType="int">
+		SELECT ifnull(sum(cmt_star), 0)
+		FROM cmt
+		WHERE movie_id= #{movieId}
+	</select>
+	
+	<update id="updateCmt">
+		update cmt 
+		set cmt_content = #{cmtContent}, cmt_star = #{cmtStar} 
+		where cmt_number = #{cmtNumber}
+	</update>
+
+</mapper>
